@@ -1,0 +1,22 @@
+import json
+import boto3
+
+def lambda_handler(event, context):
+    for x in event["Records"]:
+        action = x["eventName"]
+        ip = x["requestParameters"]["sourceIPAddress"]
+        bucket_name = x["s3"]["bucket"]["name"]
+        object = x["s3"]["object"]["key"]
+        
+    client = boto3.client("ses")
+    subject = str(action) + 'Event from' + bucket_name
+    body = """
+         <br>
+         Email To Notify You Regarding {} Event.
+         The Object {} is Deleted.
+         Source IP: {}
+    """.format(action, object, ip)  
+    
+    message = {"Subject": {"Data": subject}, "Body": {"Html": {"Data": body}}}
+    
+    response = client.send_email(Source = "AwsClassroom3@gmail.com", Destination = {"ToAddresses": ["sandeepri443@gmail.com"]}, Message = message)
